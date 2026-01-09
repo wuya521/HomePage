@@ -7,8 +7,277 @@
     <link rel="stylesheet" href="./static/style.css">
     <link rel="shortcut icon" href="./static/f2.png">
     <link rel="stylesheet" href="./static/fontawesome.css">
+    <style>
+        /* 用户栏样式 */
+        .user-bar {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-login-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .user-login-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        .user-logged {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .user-nickname {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .badge-verified {
+            background: linear-gradient(135deg, #f5af19, #f12711);
+            color: #fff;
+        }
+        .badge-verified i {
+            font-size: 10px;
+        }
+        .badge-vip {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+        }
+        .user-logout-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            padding: 4px 8px;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+        .user-logout-btn:hover {
+            color: #ff6b6b;
+        }
+        
+        /* 模态框样式 */
+        .auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .auth-modal.hidden {
+            display: none;
+        }
+        .auth-modal-content {
+            background: linear-gradient(135deg, rgba(30, 60, 114, 0.95), rgba(42, 82, 152, 0.95));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 380px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        .auth-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .auth-close-btn:hover {
+            color: #fff;
+        }
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .auth-tab {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .auth-tab.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .auth-form.hidden {
+            display: none;
+        }
+        .auth-form .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .auth-form .form-group label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+        }
+        .auth-form .form-group input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: #fff;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .auth-form .form-group input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        .auth-form .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .auth-submit-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-top: 10px;
+        }
+        .auth-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .auth-error {
+            color: #ff6b6b;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 5px;
+            min-height: 20px;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
 <body>
+    <!-- 用户登录/注册模态框 -->
+    <div id="auth-modal" class="auth-modal hidden">
+        <div class="auth-modal-content">
+            <button class="auth-close-btn" onclick="closeAuthModal()">&times;</button>
+            <div id="auth-tabs" class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">登录</button>
+                <button class="auth-tab" onclick="switchAuthTab('register')">注册</button>
+            </div>
+            <!-- 登录表单 -->
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="login-username" required placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="login-password" required placeholder="请输入密码">
+                </div>
+                <button type="submit" class="auth-submit-btn">登录</button>
+                <p id="login-error" class="auth-error"></p>
+            </form>
+            <!-- 注册表单 -->
+            <form id="register-form" class="auth-form hidden">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="register-username" required placeholder="3-20个字符">
+                </div>
+                <div class="form-group">
+                    <label>昵称</label>
+                    <input type="text" id="register-nickname" placeholder="可选，默认为用户名">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="register-password" required placeholder="至少6位">
+                </div>
+                <div class="form-group">
+                    <label>确认密码</label>
+                    <input type="password" id="register-confirm" required placeholder="再次输入密码">
+                </div>
+                <button type="submit" class="auth-submit-btn">注册</button>
+                <p id="register-error" class="auth-error"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- 右上角用户信息栏 -->
+    <div id="user-bar" class="user-bar">
+        <!-- 未登录状态 -->
+        <div id="user-guest" class="user-guest">
+            <button class="user-login-btn" onclick="openAuthModal()">
+                <i class="fas fa-user"></i> 登录 / 注册
+            </button>
+        </div>
+        <!-- 已登录状态 -->
+        <div id="user-logged" class="user-logged hidden">
+            <div class="user-info">
+                <span id="user-nickname" class="user-nickname"></span>
+                <span id="badge-verified" class="badge badge-verified hidden" title="官方认证">
+                    <i class="fas fa-check"></i>
+                </span>
+                <span id="badge-vip" class="badge badge-vip hidden" title="VIP会员">
+                    VIP
+                </span>
+            </div>
+            <button class="user-logout-btn" onclick="handleLogout()" title="退出登录">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </div>
+
     <div class="main-container">
         <!-- 左侧个人信息 -->
         <aside class="sidebar">
