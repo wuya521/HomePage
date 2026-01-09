@@ -1,5 +1,5 @@
-// API配置
-const API_BASE_URL = 'https://xxxxx.xxxx.pp.ua';
+// API配置 - 请修改为你的 Worker 域名
+const API_BASE_URL = 'https://yahoohhblog.zalkbodenstein.workers.dev';
 
 // GitHub用户名将从API获取
 let GITHUB_USERNAME = 'IonRh'; // 默认值，将被API数据覆盖
@@ -7,6 +7,285 @@ let GITHUB_USERNAME = 'IonRh'; // 默认值，将被API数据覆盖
 // 功能开关（由API控制）
 let FEATURE_ICE = false;   // 夏日空调
 let FEATURE_THEMA = false; // 背景切换
+
+// ==================== 用户认证系统 ====================
+
+// 获取存储的 token
+function getAuthToken() {
+    return localStorage.getItem('auth_token');
+}
+
+// 保存 token
+function setAuthToken(token) {
+    localStorage.setItem('auth_token', token);
+}
+
+// 清除 token
+function clearAuthToken() {
+    localStorage.removeItem('auth_token');
+}
+
+// 打开登录/注册模态框
+function openAuthModal() {
+    const modal = document.getElementById('auth-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+}
+
+// 关闭登录/注册模态框
+function closeAuthModal() {
+    const modal = document.getElementById('auth-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+    // 清除错误信息
+    const loginError = document.getElementById('login-error');
+    const registerError = document.getElementById('register-error');
+    if (loginError) loginError.textContent = '';
+    if (registerError) registerError.textContent = '';
+}
+
+// 切换登录/注册标签
+function switchAuthTab(tab) {
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const tabs = document.querySelectorAll('.auth-tab');
+    
+    tabs.forEach(t => t.classList.remove('active'));
+    
+    if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        tabs[0].classList.add('active');
+    } else {
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+        tabs[1].classList.add('active');
+    }
+    
+    // 清除错误信息
+    document.getElementById('login-error').textContent = '';
+    document.getElementById('register-error').textContent = '';
+}
+
+// 用户登录
+async function handleLogin(e) {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errorEl = document.getElementById('login-error');
+    
+    if (!username || !password) {
+        errorEl.textContent = '请填写用户名和密码';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            errorEl.textContent = data.error || '登录失败';
+            return;
+        }
+        
+        // 保存 token 并更新 UI
+        setAuthToken(data.token);
+        closeAuthModal();
+        updateUserUI(data.user);
+        console.log('登录成功:', data.user.username);
+    } catch (error) {
+        errorEl.textContent = '网络错误，请稍后重试';
+        console.error('登录错误:', error);
+    }
+}
+
+// 用户注册
+async function handleRegister(e) {
+    e.preventDefault();
+    const username = document.getElementById('register-username').value.trim();
+    const nickname = document.getElementById('register-nickname').value.trim();
+    const password = document.getElementById('register-password').value;
+    const confirm = document.getElementById('register-confirm').value;
+    const errorEl = document.getElementById('register-error');
+    
+    if (!username || !password) {
+        errorEl.textContent = '请填写用户名和密码';
+        return;
+    }
+    
+    if (password !== confirm) {
+        errorEl.textContent = '两次输入的密码不一致';
+        return;
+    }
+    
+    if (password.length < 6) {
+        errorEl.textContent = '密码长度不能少于6位';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password, nickname: nickname || username })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            errorEl.textContent = data.error || '注册失败';
+            return;
+        }
+        
+        // 保存 token 并更新 UI
+        setAuthToken(data.token);
+        closeAuthModal();
+        updateUserUI(data.user);
+        console.log('注册成功:', data.user.username);
+    } catch (error) {
+        errorEl.textContent = '网络错误，请稍后重试';
+        console.error('注册错误:', error);
+    }
+}
+
+// 用户登出
+async function handleLogout() {
+    const token = getAuthToken();
+    
+    if (token) {
+        try {
+            await fetch(`${API_BASE_URL}/api/auth/logout`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+        } catch (error) {
+            console.error('登出请求失败:', error);
+        }
+    }
+    
+    clearAuthToken();
+    updateUserUI(null);
+    console.log('已登出');
+}
+
+// 获取当前用户信息
+async function fetchCurrentUser() {
+    const token = getAuthToken();
+    if (!token) return null;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+            method: 'GET',
+            headers: { 
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            // Token 无效或过期
+            clearAuthToken();
+            return null;
+        }
+        
+        const data = await response.json();
+        return data.user;
+    } catch (error) {
+        console.error('获取用户信息失败:', error);
+        return null;
+    }
+}
+
+// 更新用户界面
+function updateUserUI(user) {
+    const guestEl = document.getElementById('user-guest');
+    const loggedEl = document.getElementById('user-logged');
+    const nicknameEl = document.getElementById('user-nickname');
+    const verifiedBadge = document.getElementById('badge-verified');
+    const vipBadge = document.getElementById('badge-vip');
+    
+    if (!guestEl || !loggedEl) return;
+    
+    if (user) {
+        // 已登录状态
+        guestEl.classList.add('hidden');
+        loggedEl.classList.remove('hidden');
+        
+        // 显示昵称
+        if (nicknameEl) {
+            nicknameEl.textContent = user.nickname || user.username;
+        }
+        
+        // 显示黄V徽章
+        if (verifiedBadge) {
+            if (user.verified) {
+                verifiedBadge.classList.remove('hidden');
+            } else {
+                verifiedBadge.classList.add('hidden');
+            }
+        }
+        
+        // 显示VIP徽章
+        if (vipBadge) {
+            if (user.vip) {
+                vipBadge.classList.remove('hidden');
+            } else {
+                vipBadge.classList.add('hidden');
+            }
+        }
+    } else {
+        // 未登录状态
+        guestEl.classList.remove('hidden');
+        loggedEl.classList.add('hidden');
+        
+        if (verifiedBadge) verifiedBadge.classList.add('hidden');
+        if (vipBadge) vipBadge.classList.add('hidden');
+    }
+}
+
+// 初始化用户认证系统
+async function initAuth() {
+    // 绑定表单提交事件
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
+    if (registerForm) {
+        registerForm.addEventListener('submit', handleRegister);
+    }
+    
+    // 点击模态框外部关闭
+    const modal = document.getElementById('auth-modal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeAuthModal();
+            }
+        });
+    }
+    
+    // 检查是否已登录
+    const user = await fetchCurrentUser();
+    updateUserUI(user);
+}
+
+// 在 DOMContentLoaded 时初始化认证系统
+document.addEventListener('DOMContentLoaded', function() {
+    initAuth();
+});
+
+// ==================== 用户认证系统结束 ====================
 
 
 //GitHub贡献图
