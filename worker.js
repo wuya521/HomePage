@@ -1,6 +1,9 @@
-addEventListener('fetch', event => {
-  event.respondWith(handleRequest(event.request))
-})
+export default {
+  async fetch(request, env) {
+    // 注入环境变量到全局，以兼容原有逻辑（或修改 handleRequest 传入 env）
+    return handleRequest(request, env);
+  }
+};
 
 // CORS 配置 - 允许前端跨域访问
 const CORS_HEADERS = {
@@ -42,7 +45,7 @@ function jsonResponse(data, status = 200) {
   });
 }
 
-async function handleRequest(request) {
+async function handleRequest(request, env) {
   const url = new URL(request.url)
   const path = url.pathname
 
@@ -50,9 +53,23 @@ async function handleRequest(request) {
   if (request.method === 'OPTIONS') {
     return handleOptions();
   }
+
+  // 优先处理静态资源（如果配置了 Workers Assets）
+  // 这样会自动使用项目中的 index.html, static/*.js, static/*.css 等文件
+  // 解决乱码问题的核心：让 Cloudflare 托管真实的静态文件，而不是在代码里写死字符串
+  if (env.ASSETS && !path.startsWith('/api/') && path !== '/manage' && path !== '/login' && path !== '/logout' && !path.startsWith('/manage/')) {
+    try {
+      const response = await env.ASSETS.fetch(request);
+      if (response.status !== 404) {
+        return response;
+      }
+    } catch (e) {
+      console.error('Assets fetch error:', e);
+    }
+  }
   
   // 获取KV命名空间
-  const kv = MY_HOME_KV // 需在Workers dashboard中绑定
+  const kv = env.MY_HOME_KV // 需在Workers dashboard中绑定
   if (!kv) {
     console.log('KV namespace not bound, using fallback')
     // 临时返回空数据，避免报错
