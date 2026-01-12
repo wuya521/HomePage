@@ -1716,6 +1716,9 @@ async function fetchDataAndUpdatePage() {
         updateTimelineFromAPI(data.timelineData);
         updateProjects(data.projectsData);
         updateSites(data.sitesData);
+        updatePortalFromAPI(data.portalData);
+        updateNoticesFromAPI(data.noticeData);
+        updateAdFromAPI(data.adData);
         updateSkillsFromAPI(data.skillsData);
         updateSocialLinksFromAPI(data.socialData);
         updateTags(data.tagsData);
@@ -1727,9 +1730,6 @@ async function fetchDataAndUpdatePage() {
         
         console.log('页面数据更新成功');
         
-        // 在获取API数据并更新GitHub用户名后，再获取GitHub统计数据
-        fetchGitHubContributions(GITHUB_USERNAME);
-        
         // 重新初始化动画和交互效果（针对动态添加的元素）
         setTimeout(() => {
             reinitializeEffects();
@@ -1737,8 +1737,6 @@ async function fetchDataAndUpdatePage() {
         
     } catch (error) {
         console.error('获取API数据失败:', error);
-        // 如果API失败，使用默认的GitHub用户名获取数据
-        fetchGitHubContributions(GITHUB_USERNAME);
         
         // 即使API失败，也要初始化现有元素的效果
         setTimeout(() => {
@@ -1832,6 +1830,112 @@ function updateSites(sitesData) {
         `;
         sitesGrid.appendChild(siteLink);
     });
+}
+
+// 更新个人门户展示
+function updatePortalFromAPI(portalData) {
+    if (!portalData || !Array.isArray(portalData)) return;
+    
+    const portalGrid = document.getElementById('portal-grid');
+    if (!portalGrid) return;
+    
+    portalGrid.innerHTML = '';
+    
+    portalData.forEach(card => {
+        const link = document.createElement('a');
+        link.className = 'portal-card';
+        link.href = card.url || '#';
+        if (card.url && /^https?:\/\//i.test(card.url)) {
+            link.target = '_blank';
+        }
+        
+        const iconWrap = document.createElement('div');
+        iconWrap.className = 'portal-icon';
+        if (card.icon && (card.icon.startsWith('fa') || card.icon.includes('fa-'))) {
+            const icon = document.createElement('i');
+            icon.className = card.icon;
+            iconWrap.appendChild(icon);
+        } else if (card.icon) {
+            const iconImg = document.createElement('img');
+            iconImg.src = card.icon;
+            iconImg.alt = card.title || 'portal';
+            iconWrap.appendChild(iconImg);
+        } else {
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-layer-group';
+            iconWrap.appendChild(icon);
+        }
+        
+        const info = document.createElement('div');
+        info.className = 'portal-info';
+        const title = document.createElement('h3');
+        title.textContent = card.title || '入口';
+        const desc = document.createElement('p');
+        desc.textContent = card.desc || '';
+        
+        info.appendChild(title);
+        info.appendChild(desc);
+        link.appendChild(iconWrap);
+        link.appendChild(info);
+        portalGrid.appendChild(link);
+    });
+}
+
+// 更新公告
+function updateNoticesFromAPI(noticeData) {
+    if (!noticeData || !Array.isArray(noticeData)) return;
+    
+    const noticeList = document.getElementById('notice-list');
+    if (!noticeList) return;
+    
+    noticeList.innerHTML = '';
+    
+    noticeData.forEach(item => {
+        const li = document.createElement('li');
+        const tag = document.createElement('span');
+        tag.className = 'notice-tag';
+        tag.textContent = item.tag || '公告';
+        
+        const text = document.createElement('span');
+        text.textContent = item.text || '';
+        
+        li.appendChild(tag);
+        li.appendChild(text);
+        noticeList.appendChild(li);
+    });
+}
+
+// 更新广告位
+function updateAdFromAPI(adData) {
+    if (!adData || typeof adData !== 'object') return;
+    
+    const adSlot = document.getElementById('ad-slot');
+    if (!adSlot) return;
+    
+    adSlot.innerHTML = '';
+    
+    const badge = document.createElement('span');
+    badge.className = 'ad-badge';
+    badge.textContent = adData.badge || '合作位';
+    
+    const title = document.createElement('h3');
+    title.textContent = adData.title || '品牌合作 / 活动曝光';
+    
+    const desc = document.createElement('p');
+    desc.textContent = adData.desc || '';
+    
+    const action = document.createElement('a');
+    action.className = 'ad-action';
+    action.textContent = adData.actionText || '了解合作';
+    action.href = adData.actionUrl || '#';
+    if (adData.actionUrl && /^https?:\/\//i.test(adData.actionUrl)) {
+        action.target = '_blank';
+    }
+    
+    adSlot.appendChild(badge);
+    adSlot.appendChild(title);
+    adSlot.appendChild(desc);
+    adSlot.appendChild(action);
 }
 
 // 更新技能展示
@@ -2672,4 +2776,3 @@ function detectDevTools() {
      // 初始化切换逻辑（确保有按钮时再绑定事件）
      initBackgroundToggle();
  }
-
