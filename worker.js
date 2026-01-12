@@ -106,6 +106,9 @@ async function handleRequest(request) {
             imagesData: [],
             profileData: {},
             locationData: {},
+            portalData: [],
+            noticeData: [],
+            adData: [],
             ice: false,
             thema: false
           },
@@ -162,7 +165,7 @@ async function handleRequest(request) {
         })
       }
       // 设置默认字段
-      const requiredFields = ['github', 'web_info', 'quoteData', 'timelineData', 'projectsData', 'sitesData', 'skillsData', 'socialData', 'tagsData', 'imagesData', 'profileData', 'locationData', 'ice', 'thema'];
+      const requiredFields = ['github', 'web_info', 'quoteData', 'timelineData', 'projectsData', 'sitesData', 'skillsData', 'socialData', 'tagsData', 'imagesData', 'profileData', 'locationData', 'portalData', 'noticeData', 'adData', 'ice', 'thema'];
       for (const field of requiredFields) {
         if (!(field in newData.data)) {
           if (field.endsWith('Data')) {
