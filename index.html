@@ -5,444 +5,213 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>个人主页</title>
     <link rel="stylesheet" href="./static/style.css">
-    <link rel="shortcut icon" href="./static/f2.png">
-    <link rel="stylesheet" href="./static/fontawesome.css">
-    <style>
-        /* 用户栏样式 */
-        .user-bar {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .user-login-btn {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-        .user-login-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
-        .user-logged {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 6px 12px;
-            border-radius: 20px;
-        }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .user-nickname {
-            color: #fff;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-weight: bold;
-        }
-        .badge-verified {
-            background: linear-gradient(135deg, #f8c34b, #f1a208);
-            color: #fff;
-        }
-        .badge-verified i {
-            font-size: 10px;
-        }
-        .badge-vip {
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(135deg, #f6d365, #fda085);
-            color: #fff;
-            animation: goldPulse 2.6s ease-in-out infinite;
-        }
-        .badge-vip > * {
-            position: relative;
-            z-index: 1;
-        }
-        .badge-vip::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.7), transparent);
-            transform: translateX(-120%);
-            animation: goldShimmer 2.6s ease-in-out infinite;
-        }
-        @keyframes goldPulse {
-            0%, 100% { box-shadow: 0 0 6px rgba(248, 195, 75, 0.2); }
-            50% { box-shadow: 0 0 12px rgba(248, 195, 75, 0.55); }
-        }
-        @keyframes goldShimmer {
-            0% { transform: translateX(-120%); }
-            60%, 100% { transform: translateX(120%); }
-        }
-        .user-logout-btn {
-            background: transparent;
-            border: none;
-            color: rgba(255, 255, 255, 0.7);
-            cursor: pointer;
-            padding: 4px 8px;
-            font-size: 14px;
-            transition: color 0.3s;
-        }
-        .user-logout-btn:hover {
-            color: #ff6b6b;
-        }
-        
-        /* 模态框样式 */
-        .auth-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-        .auth-modal.hidden {
-            display: none;
-        }
-        .auth-modal-content {
-            background: linear-gradient(135deg, rgba(30, 60, 114, 0.95), rgba(42, 82, 152, 0.95));
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-            padding: 30px;
-            width: 90%;
-            max-width: 380px;
-            position: relative;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
-        .auth-close-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: transparent;
-            border: none;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 24px;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        .auth-close-btn:hover {
-            color: #fff;
-        }
-        .auth-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-        .auth-tab {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: rgba(255, 255, 255, 0.7);
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        .auth-tab.active {
-            background: rgba(255, 255, 255, 0.2);
-            color: #fff;
-        }
-        .auth-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .auth-form.hidden {
-            display: none;
-        }
-        .auth-form .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .auth-form .form-group label {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 13px;
-        }
-        .auth-form .form-group input {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 10px 12px;
-            color: #fff;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        .auth-form .form-group input:focus {
-            outline: none;
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-        .auth-form .form-group input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-        }
-        .auth-submit-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none;
-            color: #fff;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-            margin-top: 10px;
-        }
-        .auth-submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-        .auth-error {
-            color: #ff6b6b;
-            font-size: 13px;
-            text-align: center;
-            margin-top: 5px;
-            min-height: 20px;
-        }
-        .hidden {
-            display: none !important;
-        }
-    </style>
 </head>
 <body>
-    <!-- 用户登录/注册模态框 -->
-    <div id="auth-modal" class="auth-modal hidden">
-        <div class="auth-modal-content">
-            <button class="auth-close-btn" onclick="closeAuthModal()">&times;</button>
-            <div id="auth-tabs" class="auth-tabs">
-                <button class="auth-tab active" onclick="switchAuthTab('login')">登录</button>
-                <button class="auth-tab" onclick="switchAuthTab('register')">注册</button>
-            </div>
-            <!-- 登录表单 -->
-            <form id="login-form" class="auth-form">
-                <div class="form-group">
-                    <label>用户名</label>
-                    <input type="text" id="login-username" required placeholder="请输入用户名">
-                </div>
-                <div class="form-group">
-                    <label>密码</label>
-                    <input type="password" id="login-password" required placeholder="请输入密码">
-                </div>
-                <button type="submit" class="auth-submit-btn">登录</button>
-                <p id="login-error" class="auth-error"></p>
-            </form>
-            <!-- 注册表单 -->
-            <form id="register-form" class="auth-form hidden">
-                <div class="form-group">
-                    <label>用户名</label>
-                    <input type="text" id="register-username" required placeholder="3-20个字符">
-                </div>
-                <div class="form-group">
-                    <label>昵称</label>
-                    <input type="text" id="register-nickname" placeholder="可选，默认为用户名">
-                </div>
-                <div class="form-group">
-                    <label>密码</label>
-                    <input type="password" id="register-password" required placeholder="至少6位">
-                </div>
-                <div class="form-group">
-                    <label>确认密码</label>
-                    <input type="password" id="register-confirm" required placeholder="再次输入密码">
-                </div>
-                <button type="submit" class="auth-submit-btn">注册</button>
-                <p id="register-error" class="auth-error"></p>
-            </form>
-        </div>
+    <!-- 背景动画 -->
+    <div class="background">
+        <div class="stars"></div>
+        <div class="twinkling"></div>
     </div>
 
-    <!-- 右上角用户信息栏 -->
-    <div id="user-bar" class="user-bar">
-        <!-- 未登录状态 -->
-        <div id="user-guest" class="user-guest">
-            <button class="user-login-btn" onclick="openAuthModal()">
-                <i class="fas fa-user"></i> 登录 / 注册
-            </button>
-        </div>
-        <!-- 已登录状态 -->
-        <div id="user-logged" class="user-logged hidden">
-            <div class="user-info">
-                <span id="user-nickname" class="user-nickname"></span>
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 个人信息卡片 -->
+        <section class="profile-card">
+            <div class="avatar-wrapper">
+                <img id="avatar" src="https://via.placeholder.com/150" alt="头像" class="avatar">
+                <span id="verified-badge" class="verified-badge" style="display: none;" title="黄V认证">✓</span>
+                <span id="vip-badge" class="vip-badge" style="display: none;" title="VIP用户">VIP</span>
             </div>
-            <button class="user-logout-btn" onclick="handleLogout()" title="退出登录">
-                <i class="fas fa-sign-out-alt"></i>
-            </button>
-        </div>
-    </div>
+            <h1 id="name" class="name">加载中...</h1>
+            <p id="bio" class="bio">加载中...</p>
+            <div class="social-links">
+                <a id="email-link" href="#" target="_blank" class="social-link" style="display: none;">
+                    <span class="icon">📧</span>
+                </a>
+                <a id="github-link" href="#" target="_blank" class="social-link" style="display: none;">
+                    <span class="icon">🔗</span>
+                </a>
+                <a id="twitter-link" href="#" target="_blank" class="social-link" style="display: none;">
+                    <span class="icon">🐦</span>
+                </a>
+                <a id="website-link" href="#" target="_blank" class="social-link" style="display: none;">
+                    <span class="icon">🌐</span>
+                </a>
+            </div>
+        </section>
 
-    <div class="main-container">
-        <!-- 左侧个人信息 -->
-        <aside class="sidebar">
-            <section class="profile-section">
-                <div class="profile-avatar">
-                    <img src="" alt="头像">
-                    <div class="avatar-decorations">
+        <!-- 公告区域 -->
+        <section id="announcement-section" class="announcement-section" style="display: none;">
+            <div class="announcement-card">
+                <div class="announcement-header">
+                    <span class="announcement-icon">📢</span>
+                    <h2 id="announcement-title" class="announcement-title">公告</h2>
+                </div>
+                <p id="announcement-content" class="announcement-content"></p>
+                <p id="announcement-time" class="announcement-time"></p>
+            </div>
+        </section>
+
+        <!-- 门户链接区域 -->
+        <section class="portals-section">
+            <h2 class="section-title">🚪 快速访问</h2>
+            <div id="portals-container" class="portals-grid">
+                <!-- 门户链接将通过 JS 动态加载 -->
+                <div class="portal-card skeleton">
+                    <div class="portal-icon">⏳</div>
+                    <div class="portal-info">
+                        <h3 class="portal-name">加载中...</h3>
+                        <p class="portal-desc">正在加载数据</p>
                     </div>
                 </div>
-                <div class="profile-badges">
-                    <span id="badge-verified" class="badge badge-verified hidden" title="黄V认证">
-                        <i class="fas fa-check-circle"></i> 黄V认证
-                    </span>
-                    <span id="badge-vip" class="badge badge-vip hidden" title="动态金V">
-                        <i class="fas fa-crown"></i> 金V会员
-                    </span>
+            </div>
+        </section>
+
+        <!-- 交易区域 -->
+        <section class="transaction-section">
+            <h2 class="section-title">💎 特权服务</h2>
+            
+            <!-- 兑换码区域 -->
+            <div class="transaction-card">
+                <div class="card-header">
+                    <span class="card-icon">🎟️</span>
+                    <h3>兑换码激活</h3>
                 </div>
+                <p class="card-description">拥有兑换码？在这里激活你的特权！</p>
+                <form id="redeem-form" class="redeem-form">
+                    <input 
+                        type="text" 
+                        id="redeem-code" 
+                        placeholder="请输入兑换码（例如：XXXX-XXXX-XXXX-XXXX）" 
+                        class="input-field"
+                        maxlength="19"
+                        required
+                    >
+                    <input 
+                        type="email" 
+                        id="redeem-email" 
+                        placeholder="请输入您的邮箱" 
+                        class="input-field"
+                        required
+                    >
+                    <button type="submit" class="btn-primary">
+                        <span class="btn-text">立即兑换</span>
+                    </button>
+                </form>
+                <div id="redeem-message" class="message" style="display: none;"></div>
+            </div>
+
+            <!-- VIP 购买区域 -->
+            <div class="transaction-card">
+                <div class="card-header">
+                    <span class="card-icon">👑</span>
+                    <h3>VIP 会员</h3>
+                </div>
+                <p class="card-description">升级 VIP，享受更多专属特权和服务！</p>
                 
-                <div class="profile-info">
-                    <div class="status">
-                        <span class="emoji"></span>
-                        <span class="title"></span>
+                <div class="vip-plans">
+                    <div class="vip-plan">
+                        <div class="plan-badge">VIP 1</div>
+                        <div class="plan-name">基础会员</div>
+                        <div class="plan-price">¥29<span>/月</span></div>
+                        <ul class="plan-features">
+                            <li>✓ 专属标识</li>
+                            <li>✓ 优先响应</li>
+                            <li>✓ 基础功能</li>
+                        </ul>
+                        <button class="btn-vip" onclick="showVipPurchase('VIP1', 29)">立即购买</button>
                     </div>
-                    <div class="quote">
-                        <span class="emoji">📝</span>
-                        <span></span>
-                    </div>
-                    
-                    <div class="social-links">
-                        <a href="" target="_blank"><i class="fas fa-github"></i></a>
-                        <a href="" target="_blank"><i class="fas fa-envelope"></i></a>
-                        <a href="" target="_blank"><i class="fas fa-paper-plane"></i></a>
-                        <a href="#" onclick="showIframe()" title="夏日空调"><i class="fas fa-circle"></i></a>
-                    </div>
-                    
-                    <div class="location-info">
-                        <div class="location">
-                            <i class="fa fa-map-marker"></i>
-                            <span></span>
-                        </div>
-                        <div class="name">
-                            <i class="fas fa-briefcase"></i>
-                            <span></span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <!-- 个人标签 -->
-            <section class="tags-section">
-            </section>
-                        
-            <!-- 技能展示 -->
-            <section class="skills-section">
-                <h2><i class="fas fa-heart"></i> 欢迎您</h2>
-                <div class="stat-item">
-                    <span class="stat-label">访客IP: </span>
-                    <span class="stat-number blur-effect" id="visitor-ip">获取中...</span>
-                </div>
-            </section>
-            <br>
-            <!-- 时间线 -->
-            <section class="timeline-section">
-            </section>
-        </aside>
-        
-        <!-- 右侧内容区域 -->
-        <main class="content-area">
 
-            <!-- 个人门户展示 -->
-            <section class="portal-section">
-                <h2><i class="fas fa-compass"></i> 个人门户展示</h2>
-                <div id="portal-grid" class="portal-grid">
-                    <a class="portal-card" href="#">
-                        <div class="portal-icon"><i class="fas fa-user-astronaut"></i></div>
-                        <div class="portal-info">
-                            <h3>个人门户</h3>
-                            <p>统一入口，快速跳转个人应用与服务。</p>
-                        </div>
-                    </a>
-                    <a class="portal-card" href="#">
-                        <div class="portal-icon"><i class="fas fa-th-large"></i></div>
-                        <div class="portal-info">
-                            <h3>可选展示区</h3>
-                            <p>活动、作品、资源位按需配置。</p>
-                        </div>
-                    </a>
-                    <a class="portal-card" href="#">
-                        <div class="portal-icon"><i class="fas fa-layer-group"></i></div>
-                        <div class="portal-info">
-                            <h3>常用入口</h3>
-                            <p>文档、工单、工具集一键直达。</p>
-                        </div>
-                    </a>
-                </div>
-            </section>
+                    <div class="vip-plan featured">
+                        <div class="featured-label">推荐</div>
+                        <div class="plan-badge gold">VIP 2</div>
+                        <div class="plan-name">高级会员</div>
+                        <div class="plan-price">¥99<span>/月</span></div>
+                        <ul class="plan-features">
+                            <li>✓ 包含 VIP 1 所有特权</li>
+                            <li>✓ 黄V认证</li>
+                            <li>✓ 高级功能</li>
+                            <li>✓ 专属客服</li>
+                        </ul>
+                        <button class="btn-vip" onclick="showVipPurchase('VIP2', 99)">立即购买</button>
+                    </div>
 
-            <!-- 公告 -->
-            <section class="notice-section">
-                <h2><i class="fas fa-bullhorn"></i> 公告</h2>
-                <ul id="notice-list" class="notice-list">
-                    <li><span class="notice-tag">置顶</span> 个人门户已升级，支持可选展示模块。</li>
-                    <li><span class="notice-tag">更新</span> 广告位支持排期与素材预览。</li>
-                    <li><span class="notice-tag">提醒</span> 资料完善后将同步更新头像与身份标识。</li>
-                </ul>
-            </section>
+                    <div class="vip-plan">
+                        <div class="plan-badge platinum">VIP 3</div>
+                        <div class="plan-name">至尊会员</div>
+                        <div class="plan-price">¥299<span>/月</span></div>
+                        <ul class="plan-features">
+                            <li>✓ 包含 VIP 2 所有特权</li>
+                            <li>✓ 定制服务</li>
+                            <li>✓ 全部功能</li>
+                            <li>✓ 优先支持</li>
+                        </ul>
+                        <button class="btn-vip" onclick="showVipPurchase('VIP3', 299)">立即购买</button>
+                    </div>
+                </div>
+            </div>
 
-            <!-- 广告位 -->
-            <section class="ad-section">
-                <h2><i class="fas fa-ad"></i> 广告位</h2>
-                <div id="ad-slot" class="ad-slot">
-                    <span class="ad-badge">合作位</span>
-                    <h3>品牌合作 / 活动曝光</h3>
-                    <p>支持图文、按钮和跳转链接，自由配置投放时段。</p>
-                    <a class="ad-action" href="#">了解合作</a>
+            <!-- VIP 状态查询 -->
+            <div class="transaction-card">
+                <div class="card-header">
+                    <span class="card-icon">🔍</span>
+                    <h3>查询 VIP 状态</h3>
                 </div>
-            </section>
-            
-            <!-- 站点展示 -->
-            <section class="sites-section">
-                <h2><i class="fas fa-globe"></i> WebSite</h2>
-                <div class="sites-grid">
-                </div>
-            </section>
-            
-            <!-- 项目展示 -->
-            <section class="projects-section">
-                <h2><i class="fas fa-cube"></i> 项目集</h2>
-                <div class="projects-grid">
-                </div>
-            </section>
-            
-            <!-- 技能展示 -->
-            <section class="skills-section">
-                <h2><i class="fas fa-wrench"></i> 技能栈</h2>
-                <div class="skills-icons">
-            </section>
-        </main>
-    </div>
-    <!-- 背景切换开关 -->
-    <div id="background-toggle" class="background-toggle" title="切换背景">
-        <i class="fas fa-moon"></i>
+                <form id="vip-check-form" class="vip-check-form">
+                    <input 
+                        type="email" 
+                        id="vip-check-email" 
+                        placeholder="输入邮箱查询 VIP 状态" 
+                        class="input-field"
+                        required
+                    >
+                    <button type="submit" class="btn-secondary">查询状态</button>
+                </form>
+                <div id="vip-status-message" class="message" style="display: none;"></div>
+            </div>
+        </section>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>© 2026 个人主页 | 使用纯原生 HTML 构建</p>
+            <p>
+                <a href="./manage.html" class="footer-link">后台管理</a>
+            </p>
+        </footer>
     </div>
 
-    <footer>
-            <p>© 2025 WebSite by <a id="footer-link" href="#" target="_blank">阿布白(IonRh)</a></p>
-    </footer>
+    <!-- VIP 购买弹窗 -->
+    <div id="vip-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeVipModal()">&times;</span>
+            <h2>购买 <span id="modal-vip-level"></span></h2>
+            <p class="modal-price">¥<span id="modal-vip-price"></span>/月</p>
+            <p class="modal-description">
+                本功能为演示功能。实际使用时，您需要接入支付系统（如支付宝、微信支付等）。
+            </p>
+            <form id="vip-purchase-form" class="modal-form">
+                <input 
+                    type="email" 
+                    id="purchase-email" 
+                    placeholder="请输入您的邮箱" 
+                    class="input-field"
+                    required
+                >
+                <input 
+                    type="text" 
+                    id="purchase-name" 
+                    placeholder="请输入您的姓名" 
+                    class="input-field"
+                    required
+                >
+                <button type="submit" class="btn-primary">确认购买</button>
+            </form>
+            <div id="purchase-message" class="message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- 加载脚本 -->
+    <script src="./static/script.js"></script>
 </body>
-<script src="./static/script.js"></script>
 </html>
+
