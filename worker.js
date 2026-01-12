@@ -36,7 +36,7 @@ function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: { 
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
       ...CORS_HEADERS
     }
   });
@@ -66,7 +66,7 @@ async function handleRequest(request) {
   if (path === '/manage' && !(await checkAuth(request, kv))) {
     return new Response(getLoginPage(), {
       status: 200,
-      headers: { 'Content-Type': 'text/html' }
+      headers: { 'Content-Type': 'text/html; charset=utf-8' }
     })
   }
   
@@ -117,7 +117,7 @@ async function handleRequest(request) {
         return new Response(JSON.stringify(defaultData), {
           status: 200,
           headers: { 
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json; charset=utf-8',
             'Access-Control-Allow-Origin': '*'
           }
         })
@@ -125,7 +125,7 @@ async function handleRequest(request) {
       return new Response(JSON.stringify(data), {
         status: 200,
         headers: { 
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*'
         }
       })
@@ -133,7 +133,7 @@ async function handleRequest(request) {
       return new Response(JSON.stringify({ error: 'Internal server error' }), {
         status: 500,
         headers: { 
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*'
         }
       })
@@ -146,7 +146,7 @@ async function handleRequest(request) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { 
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*'
         }
       })
@@ -159,7 +159,7 @@ async function handleRequest(request) {
         return new Response(JSON.stringify({ error: 'Invalid data format: data must be an object' }), {
           status: 400,
           headers: { 
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json; charset=utf-8',
             'Access-Control-Allow-Origin': '*'
           }
         })
@@ -190,7 +190,7 @@ async function handleRequest(request) {
       }), {
         status: 200,
         headers: { 
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*'
         }
       })
@@ -198,7 +198,7 @@ async function handleRequest(request) {
       return new Response(JSON.stringify({ error: 'Internal server error' }), {
         status: 500,
         headers: { 
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*'
         }
       })
@@ -212,7 +212,7 @@ async function handleRequest(request) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { 
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*'
         }
       })
@@ -224,7 +224,7 @@ async function handleRequest(request) {
         return new Response(JSON.stringify({ error: 'Username and password required' }), {
           status: 400,
           headers: { 
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json; charset=utf-8',
             'Access-Control-Allow-Origin': '*'
           }
         })
@@ -237,7 +237,7 @@ async function handleRequest(request) {
       return new Response(JSON.stringify({ message: 'Password updated successfully' }), {
         status: 200,
         headers: { 
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*'
         }
       })
@@ -245,7 +245,7 @@ async function handleRequest(request) {
       return new Response(JSON.stringify({ error: 'Internal server error' }), {
         status: 500,
         headers: { 
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*'
         }
       })
@@ -289,7 +289,7 @@ async function handleRequest(request) {
       return new Response(JSON.stringify(response), {
         status: 200,
         headers: { 
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*',
           'Cache-Control': 'no-cache'
         }
@@ -302,7 +302,7 @@ async function handleRequest(request) {
       }), {
         status: 500,
         headers: { 
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*'
         }
       });
@@ -313,7 +313,7 @@ async function handleRequest(request) {
   if (path === '/manage') {
     return new Response(getManagementPage(), {
       status: 200,
-      headers: { 'Content-Type': 'text/html' }
+      headers: { 'Content-Type': 'text/html; charset=utf-8' }
     })
   }
 
@@ -378,23 +378,505 @@ body { margin: 0; font-family: Arial, sans-serif; background: #1a1a2e; color: #f
 .sidebar { width: 300px; background: rgba(255,255,255,0.05); padding: 20px; }
 .content-area { flex: 1; padding: 20px; }
 .profile-avatar img { width: 100px; height: 100px; border-radius: 50%; }`
-        return new Response(css, { headers: { 'Content-Type': 'text/css' } })
+        return new Response(css, { headers: { 'Content-Type': 'text/css; charset=utf-8' } })
       }
       
       if (fileName === 'script.js') {
-        const js = `// 默认脚本
-console.log('Worker 静态资源加载');
+        const js = `// 修复后的脚本
+const API_BASE_URL = '';
+let GITHUB_USERNAME = 'IonRh'; // 默认值
+let FEATURE_ICE = false; // 夏日空调
+let FEATURE_THEMA = false; // 背景切换
+
+// ==================== 用户认证系统 ====================
+
+function getAuthToken() { return localStorage.getItem('auth_token'); }
+function setAuthToken(token) { localStorage.setItem('auth_token', token); }
+function clearAuthToken() { localStorage.removeItem('auth_token'); }
+
+function openAuthModal() {
+  const modal = document.getElementById('auth-modal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeAuthModal() {
+  const modal = document.getElementById('auth-modal');
+  if (modal) modal.classList.add('hidden');
+  const loginError = document.getElementById('login-error');
+  const registerError = document.getElementById('register-error');
+  if (loginError) loginError.textContent = '';
+  if (registerError) registerError.textContent = '';
+}
+
+function switchAuthTab(tab) {
+  const loginForm = document.getElementById('login-form');
+  const registerForm = document.getElementById('register-form');
+  const tabs = document.querySelectorAll('.auth-tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  if (tab === 'login') {
+    loginForm.classList.remove('hidden');
+    registerForm.classList.add('hidden');
+    tabs[0].classList.add('active');
+  } else {
+    loginForm.classList.add('hidden');
+    registerForm.classList.remove('hidden');
+    tabs[1].classList.add('active');
+  }
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errorEl = document.getElementById('login-error');
+  
+  if (!username || !password) {
+    errorEl.textContent = '请填写用户名和密码';
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      errorEl.textContent = data.error || '登录失败';
+      return;
+    }
+    setAuthToken(data.token);
+    closeAuthModal();
+    updateUserUI(data.user);
+    window.location.reload();
+  } catch (error) {
+    errorEl.textContent = '网络错误';
+    console.error('登录错误:', error);
+  }
+}
+
+async function handleRegister(e) {
+  e.preventDefault();
+  const username = document.getElementById('register-username').value.trim();
+  const nickname = document.getElementById('register-nickname').value.trim();
+  const password = document.getElementById('register-password').value;
+  const confirm = document.getElementById('register-confirm').value;
+  const errorEl = document.getElementById('register-error');
+  
+  if (!username || !password) {
+    errorEl.textContent = '请填写用户名和密码';
+    return;
+  }
+  if (password !== confirm) {
+    errorEl.textContent = '两次输入的密码不一致';
+    return;
+  }
+  if (password.length < 6) {
+    errorEl.textContent = '密码长度不能少于6位';
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, nickname: nickname || username })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      errorEl.textContent = data.error || '注册失败';
+      return;
+    }
+    setAuthToken(data.token);
+    closeAuthModal();
+    updateUserUI(data.user);
+    window.location.reload();
+  } catch (error) {
+    errorEl.textContent = '网络错误';
+    console.error('注册错误:', error);
+  }
+}
+
+async function handleLogout() {
+  const token = getAuthToken();
+  if (token) {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+    } catch (e) { console.error(e); }
+  }
+  clearAuthToken();
+  updateUserUI(null);
+  window.location.reload();
+}
+
+async function fetchCurrentUser() {
+  const token = getAuthToken();
+  if (!token) return null;
+  try {
+    const response = await fetch('/api/auth/me', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!response.ok) {
+      clearAuthToken();
+      return null;
+    }
+    const data = await response.json();
+    return data.user;
+  } catch { return null; }
+}
+
+function updateUserUI(user) {
+  const guestEl = document.getElementById('user-guest');
+  const loggedEl = document.getElementById('user-logged');
+  const nicknameEl = document.getElementById('user-nickname');
+  const verifiedBadge = document.getElementById('badge-verified');
+  const vipBadge = document.getElementById('badge-vip');
+  
+  if (!guestEl || !loggedEl) return;
+  
+  if (user) {
+    guestEl.classList.add('hidden');
+    loggedEl.classList.remove('hidden');
+    if (nicknameEl) nicknameEl.textContent = user.nickname || user.username;
+    if (verifiedBadge) user.verified ? verifiedBadge.classList.remove('hidden') : verifiedBadge.classList.add('hidden');
+    if (vipBadge) user.vip ? vipBadge.classList.remove('hidden') : vipBadge.classList.add('hidden');
+  } else {
+    guestEl.classList.remove('hidden');
+    loggedEl.classList.add('hidden');
+    if (verifiedBadge) verifiedBadge.classList.add('hidden');
+    if (vipBadge) vipBadge.classList.add('hidden');
+  }
+}
+
+function initAuth() {
+  const loginForm = document.getElementById('login-form');
+  const registerForm = document.getElementById('register-form');
+  if (loginForm) loginForm.addEventListener('submit', handleLogin);
+  if (registerForm) registerForm.addEventListener('submit', handleRegister);
+  
+  const modal = document.getElementById('auth-modal');
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeAuthModal();
+    });
+  }
+  
+  fetchCurrentUser().then(user => updateUserUI(user));
+}
+
+// ==================== GitHub 贡献图 ====================
+
+async function fetchGitHubContributions(username) {
+  try {
+    console.log('正在获取GitHub贡献数据...');
+    // 尝试多个API源
+    const {data, source} = await fetchGitHubContributionsFromAPI(username);
+    updateContributionChart(data, source);
+  } catch (error) {
+    console.error('获取GitHub贡献数据失败:', error);
+    const mockData = generateMockContributions();
+    updateContributionChart(mockData, 'generated');
+  }
+}
+
+async function fetchGitHubContributionsFromAPI(username) {
+  const apiSources = [
+    { 
+      name: 'GitHub Contributions API', 
+      url: \`https://github-contributions-api.jogruber.de/v4/\${username}\`,
+      parser: (data) => {
+        return (data.contributions || []).map(c => ({
+          date: c.date,
+          count: c.count,
+          level: c.level || getContributionLevel(c.count)
+        }));
+      }
+    },
+    {
+      name: 'Alternative API',
+      url: \`https://github-calendar-api.vercel.app/api/\${username}\`,
+      parser: (data) => {
+        const contributions = [];
+        if (data && data.contributions) {
+           for (const [date, count] of Object.entries(data.contributions)) {
+             contributions.push({ date, count, level: getContributionLevel(count) });
+           }
+        }
+        return contributions;
+      }
+    }
+  ];
+
+  for (const source of apiSources) {
+    try {
+      const response = await fetch(source.url);
+      if (response.ok) {
+        const data = await response.json();
+        const contributions = source.parser(data);
+        if (contributions.length > 0) return { data: contributions, source: 'api' };
+      }
+    } catch (e) { console.warn(source.name + ' failed'); }
+  }
+  
+  throw new Error('All APIs failed');
+}
+
+function getContributionLevel(count) {
+  if (count === 0) return 0;
+  if (count <= 3) return 1;
+  if (count <= 6) return 2;
+  if (count <= 9) return 3;
+  return 4;
+}
+
+function generateMockContributions() {
+  const data = [];
+  const today = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    data.push({
+      date: d.toISOString().split('T')[0],
+      count: 0,
+      level: Math.random() > 0.8 ? Math.floor(Math.random() * 5) : 0
+    });
+  }
+  return data;
+}
+
+function updateContributionChart(data, source) {
+  const chart = document.getElementById('contribution-chart');
+  if (!chart) return;
+  
+  // 简单渲染热力图网格
+  chart.innerHTML = '';
+  
+  const container = document.createElement('div');
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
+  container.style.alignItems = 'center';
+  container.style.width = '100%';
+  
+  const grid = document.createElement('div');
+  grid.style.display = 'flex';
+  grid.style.flexWrap = 'wrap';
+  grid.style.gap = '3px';
+  grid.style.justifyContent = 'center';
+  grid.style.maxWidth = '100%';
+  
+  // 排序
+  data.sort((a, b) => new Date(a.date) - new Date(b.date));
+  const recentData = data.slice(-365); // 最近一年
+  
+  recentData.forEach(day => {
+    const el = document.createElement('div');
+    el.style.width = '10px';
+    el.style.height = '10px';
+    el.style.borderRadius = '2px';
+    el.style.backgroundColor = getLevelColor(day.level);
+    el.title = \`\${day.date}: \${day.count} contributions\`;
+    grid.appendChild(el);
+  });
+  
+  container.appendChild(grid);
+  
+  // 底部说明
+  const legend = document.createElement('div');
+  legend.style.marginTop = '10px';
+  legend.style.fontSize = '12px';
+  legend.style.color = 'rgba(255,255,255,0.6)';
+  legend.style.display = 'flex';
+  legend.style.alignItems = 'center';
+  legend.style.gap = '5px';
+  
+  legend.innerHTML = \`
+    <span>Less</span>
+    <span style="display:inline-block;width:10px;height:10px;background:#ebedf0;border-radius:2px;"></span>
+    <span style="display:inline-block;width:10px;height:10px;background:#9be9a8;border-radius:2px;"></span>
+    <span style="display:inline-block;width:10px;height:10px;background:#40c463;border-radius:2px;"></span>
+    <span style="display:inline-block;width:10px;height:10px;background:#30a14e;border-radius:2px;"></span>
+    <span style="display:inline-block;width:10px;height:10px;background:#216e39;border-radius:2px;"></span>
+    <span>More</span>
+    <span style="margin-left:10px;">\${source === 'api' ? '(数据来源: API)' : '(数据来源: 模拟)'}</span>
+  \`;
+  
+  container.appendChild(legend);
+  chart.appendChild(container);
+}
+
+function getLevelColor(level) {
+  switch(level) {
+    case 0: return 'rgba(255,255,255,0.1)'; 
+    case 1: return '#0e4429';
+    case 2: return '#006d32';
+    case 3: return '#26a641';
+    case 4: return '#39d353';
+    default: return 'rgba(255,255,255,0.1)';
+  }
+}
+
+// ==================== 页面渲染 ====================
+
+function renderProfile(data) {
+  const profile = data.profileData || {};
+  const location = data.locationData || {};
+  const images = data.imagesData || [];
+  
+  const avatarImg = images.find(i => i.avatar)?.avatar;
+  if (avatarImg) {
+      const imgEl = document.querySelector('.profile-avatar img');
+      if (imgEl) imgEl.src = avatarImg;
+  }
+  
+  const bgImg = images.find(i => i.bg_image)?.bg_image;
+  if (bgImg) {
+      document.body.style.backgroundImage = 'url(' + bgImg + ')';
+      document.body.style.backgroundSize = 'cover';
+      document.body.style.backgroundAttachment = 'fixed';
+  }
+  
+  const decos = profile.avatarDecorations || [];
+  const decoContainer = document.querySelector('.avatar-decorations');
+  if (decoContainer) decoContainer.innerHTML = decos.map(d => '<span>' + d + '</span>').join('');
+  
+  const statusEmoji = document.querySelector('.status .emoji');
+  if (statusEmoji) statusEmoji.textContent = profile.statusEmoji || '';
+  
+  const statusTitle = document.querySelector('.status .title');
+  if (statusTitle) statusTitle.textContent = profile.statusTitle || '';
+  
+  const quoteSpan = document.querySelector('.quote span:last-child');
+  if (quoteSpan) quoteSpan.textContent = data.quoteData || '';
+  
+  const locSpan = document.querySelector('.location span');
+  if (locSpan) locSpan.textContent = location.place || '';
+  
+  const workSpan = document.querySelector('.location-info .name span');
+  if (workSpan) workSpan.textContent = location.workStatus || '';
+}
+
+function renderTimeline(timeline) {
+  const container = document.querySelector('.timeline-section');
+  if (!container || !timeline || !timeline.length) return;
+  
+  const html = timeline.map(item => \`
+    <div style="margin-bottom: 15px; padding-left: 15px; border-left: 2px solid rgba(255,255,255,0.2);">
+      <div style="font-size: 0.85em; opacity: 0.7;">\${item.date}</div>
+      <div style="font-weight: 500;">\${item.title}</div>
+    </div>
+  \`).join('');
+  
+  container.innerHTML = '<h2><i class="fas fa-history"></i> 时间线</h2><div class="timeline-list">' + html + '</div>';
+}
+
+function renderProjects(projects) {
+  const container = document.querySelector('.projects-grid');
+  if (!container || !projects) return;
+  
+  container.innerHTML = projects.map(item => \`
+    <a href="\${item.url}" target="_blank" class="project-card" style="display:block; background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; text-decoration:none; color:inherit; margin-bottom:10px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="font-size:1.5em;">\${item.icon || '📦'}</div>
+        <div>
+          <h3 style="margin:0; font-size:1em;">\${item.name}</h3>
+          <p style="margin:5px 0 0; font-size:0.85em; opacity:0.7;">\${item.desc}</p>
+        </div>
+      </div>
+    </a>
+  \`).join('');
+}
+
+function renderSites(sites) {
+  const container = document.querySelector('.sites-grid');
+  if (!container || !sites) return;
+  
+  container.innerHTML = sites.map(item => \`
+    <a href="\${item.url}" target="_blank" class="site-card" style="display:inline-block; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; text-decoration:none; color:inherit; margin:5px; width:calc(50% - 15px);">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="font-size:1.2em;">\${item.icon || '🌐'}</div>
+        <div>
+          <div style="font-weight:500;">\${item.name}</div>
+        </div>
+      </div>
+    </a>
+  \`).join('');
+}
+
+function renderSkills(skills) {
+  const container = document.querySelector('.skills-icons');
+  if (!container || !skills) return;
+  
+  container.innerHTML = skills.map(item => \`
+    <div style="display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; background:rgba(255,255,255,0.1); border-radius:50%; margin:5px;" title="\${item.name}">
+      \${item.icon || '🔧'}
+    </div>
+  \`).join('');
+}
+
+function renderSocial(social) {
+  const container = document.querySelector('.social-links');
+  if (!container || !social) return;
+  
+  container.innerHTML = social.map(item => \`
+    <a href="\${item.url}" target="_blank" style="margin-right:10px; color:inherit; font-size:1.2em;">
+      <i class="\${item.ico || 'fas fa-link'}"></i>
+    </a>
+  \`).join('');
+}
+
+function renderTags(tags) {
+  const container = document.querySelector('.tags-section');
+  if (!container || !tags) return;
+  
+  container.innerHTML = tags.map(tag => \`
+    <span style="display:inline-block; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:4px; font-size:0.85em; margin:2px;">\${tag}</span>
+  \`).join('');
+}
+
+async function initPage() {
+  try {
+    const res = await fetch('/api/data').then(r => r.json());
+    const data = res.data;
+    if (data.web_info?.title) document.title = data.web_info.title;
+    
+    // 设置全局变量
+    if (data.github) GITHUB_USERNAME = data.github;
+    if (data.ice !== undefined) FEATURE_ICE = data.ice;
+    if (data.thema !== undefined) FEATURE_THEMA = data.thema;
+    
+    renderProfile(data);
+    renderTimeline(data.timelineData);
+    renderProjects(data.projectsData);
+    renderSites(data.sitesData);
+    renderSkills(data.skillsData);
+    renderSocial(data.socialData);
+    renderTags(data.tagsData);
+    
+    // 加载GitHub贡献
+    if (GITHUB_USERNAME) {
+        fetchGitHubContributions(GITHUB_USERNAME);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-  // 获取访客IP
+  initAuth();
+  initPage();
   fetch('/api/visitor-ip')
     .then(res => res.json())
     .then(data => {
-      const ipElement = document.getElementById('visitor-ip');
-      if (ipElement) ipElement.textContent = data.displayText || data.ip;
-    })
-    .catch(err => console.error('获取IP失败:', err));
-});`
-        return new Response(js, { headers: { 'Content-Type': 'application/javascript' } })
+      const el = document.getElementById('visitor-ip');
+      if (el) el.innerHTML = data.displayText || data.ip;
+    });
+});
+`;
+        return new Response(js, { headers: { 'Content-Type': 'application/javascript; charset=utf-8' } })
       }
       
       if (fileName === 'fontawesome.css') {
@@ -411,7 +893,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (path === '/') {
     return new Response(getHomePage(), {
       status: 200,
-      headers: { 'Content-Type': 'text/html' }
+      headers: { 'Content-Type': 'text/html; charset=utf-8' }
     })
   }
 
@@ -914,13 +1396,13 @@ async function handleLogin(request, kv) {
     } else {
       return new Response(getLoginPage('用户名或密码错误'), {
         status: 200,
-        headers: { 'Content-Type': 'text/html' }
+        headers: { 'Content-Type': 'text/html; charset=utf-8' }
       })
     }
   } catch (error) {
     return new Response(getLoginPage('登录失败，请重试'), {
       status: 200,
-      headers: { 'Content-Type': 'text/html' }
+      headers: { 'Content-Type': 'text/html; charset=utf-8' }
     })
   }
 }
